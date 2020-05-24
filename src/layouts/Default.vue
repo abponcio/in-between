@@ -33,8 +33,6 @@ body {
 
 .layout {
   margin: 0 auto;
-  padding-left: 20px;
-  padding-right: 20px;
 }
 
 .header {
@@ -43,6 +41,8 @@ body {
   align-items: center;
   margin-bottom: 20px;
   height: 80px;
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .nav__link {

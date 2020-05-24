@@ -8,20 +8,32 @@
                     <h5>Chat Box ({{users}} user/s connected)</h5>
                     <p>{{currentUser}}</p>
                 </div>
-                <div class="chat">
+                <div ref="chat" class="chat">
                     <message v-for="(message, index) in messages" :key="index" :session="session" :value="message"></message>
                 </div>
                 <form @submit.prevent="sendMessage" class="sendChat">
-                    <input type="text" v-model="message"/>
+                    <div class="control">
+                        <input type="text" v-model="message"/>
+                    </div>
                     <button type="submit">Send</button>
                 </form>
             </div>
-            <player class="user-left" v-for="(player, index) in players" :key="index" :value.sync="player" :joined="joined" :class="`user-${player.position}`" @join="(data) => joinGame(data)" :session="session"></player>
+            <player class="user-left" 
+                v-for="(player, index) in players" 
+                :key="index" 
+                :value.sync="player" 
+                :joined="joined" 
+                :class="`user-${player.position}`" 
+                @join="(data) => joinGame(data)" 
+                :session="session"
+                @submitName="data => submitName(data)"></player>
             <div class="dealer">
-                <div class="deck" v-for="(card, index) in deck" :key="index" :class="{'shifted': deck.length === index + 1}">
-                    <card :value.sync="card"></card>
+                <div style="padding: 0 1rem; border-right: 1px solid;">
+                    <card :value.sync="deck[deck.length - 1]"></card>
                 </div>
-                <div class="river">{{this.deck.length}}</div>
+                <div class="river">
+                    <card v-for="(river, index) in rivers" :key="index" :value.sync="river" :empty="!river.name" :river="true" style="margin-left: 5px"></card>
+                </div>
             </div>
         </div>
     </Layout>
@@ -33,8 +45,8 @@ import Player from "@/components/Player.vue";
 import Message from "@/components/Message.vue";
 import SocketIO  from 'socket.io-client';
 
-export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
-// export const socket = SocketIO('http://localhost:3000');
+// export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
+export const socket = SocketIO('http://localhost:3000');
 
 export default {
     created() {
@@ -57,6 +69,10 @@ export default {
 
             return this.players.find(player => player.id === this.session)?.name || `Anon${Math.floor(Math.random() * 1000)}`;
         },
+        scrollChat() {
+
+            return this.$refs?.chat?.scrollHeight || 0;
+        }
     },
     data() {
 
@@ -76,6 +92,7 @@ export default {
             message: '',
             messages: [],
             users: 0,
+            rivers: [],
         };
     },
     methods: {
@@ -127,6 +144,8 @@ export default {
                     });
                 });
             });
+
+            this.rivers = new Array(2).fill({});
         },
         createPlayers() {
 
@@ -137,6 +156,7 @@ export default {
                     index,
                     id: null,
                     current: false,
+                    submitted: false,
                     name: `Unassigned`,
                     position: this.positions[index],
                     hands: new Array(2).fill({}),
@@ -157,6 +177,8 @@ export default {
 
                 return data;
             });
+
+            this.rivers = [this.deck.pop(), this.deck.pop()];
 
             if (!this.players.every(player => player.hands.length === 2)) {
 
@@ -195,6 +217,16 @@ export default {
 
             this.message = '';
         },
+        submitName(data) {
+
+            const payload = Object.assign(data.player, {
+                name: data.name,
+                submitted: true,
+            });
+
+            socket.emit('updatePlayer', payload);
+
+        },
     },
     metaInfo: {
         title: "Cards stuff",
@@ -218,9 +250,13 @@ export default {
             this.deck = data.deck;
         });
 
-        socket.on('newMessage', data => {
+        socket.on('newMessage', async data => {
 
             this.messages.push(data);
+
+            await this.$nextTick();
+
+            this.$refs.chat.scrollTop = this.$refs.chat.scrollHeight;
         });
 
         socket.on('connected', data => this.users = data);
@@ -231,8 +267,9 @@ export default {
 <style scoped>
 
     .table {
-        height: 80vh;
+        min-height: 80vh;
         display: grid;
+        align-items: center;
         grid-template-areas:
             '. . userTop userTop . chatBox'
             'userLeft dealer dealer dealer dealer chatBox'
@@ -246,6 +283,17 @@ export default {
         border-radius: 3px;
     }
 
+    @media screen and (max-width: 1024px) {
+        .table {
+            grid-template-areas:
+            'dealer dealer'
+            'dealer dealer'
+            'userLeft userTop'
+            'userRight userBottom'
+            'chatBox chatBox';
+        }
+    }
+
     .user-left { grid-area: userLeft; }
     .user-top { grid-area: userTop; }
     .user-right { grid-area: userRight; }
@@ -254,14 +302,25 @@ export default {
     .chatbox { grid-area: chatBox; }
 
     .dealer {
-        position: relative;
+        display: grid;
+        grid-auto-flow: column;
+        grid-template-columns: auto 2fr;
+        align-items: center;
+        background: #5dad6a;
+        padding: 5px;
+        border-radius: 5px;
     }
     .deck {
-
         position: absolute;
         top: 50%;
         transform: translateY(-50%);
         left: 0;
+    }
+    @media screen and (max-width: 1024px) {
+        .deck {
+            top: 0;
+            transform: none;
+        }
     }
     .shifted {
         left: 10px;
@@ -277,5 +336,35 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 5px;
+    }
+    .flex h5 {
+        margin-bottom: 0;
+    }
+    .flex p {
+        margin-bottom: 0;
+    }
+
+    .river {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 1rem;
+    }
+
+    .control {
+        flex-basis: 80%;
+    }
+
+    .control input {
+        width: 100%;
+    }
+    .sendChat {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 5px;
     }
 </style>

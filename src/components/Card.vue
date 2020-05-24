@@ -12,7 +12,7 @@
                 {{value.name}}
             </div>
         </div>
-        <div class="card-back" style="color: black;" @click="value.hidden = !value.hidden" v-else-if="player && player.current && session === player.id">
+        <div class="card-back" style="color: black;" @click="value.hidden = !value.hidden" v-else-if="(player && player.current && session === player.id) || river">
             <h2>Reveal</h2>
         </div>
         <div class="card-back" style="color: black;" v-else>
@@ -29,7 +29,8 @@ export default {
         'empty',
         'value',
         'player',
-        'session'
+        'session',
+        'river'
     ],
 }
 </script>
@@ -47,6 +48,18 @@ export default {
         background-color: #fff;
         backface-visibility: hidden;
     }
+
+    @media screen and (max-width: 1024px) {
+        .card {
+            width: calc(50px + 0.5vw);
+            height: calc(80px + 0.5vw);
+        }
+
+        h2 {
+            font-size: calc(10px + 0.5vw);
+        }
+
+    }
     .card.other {
         cursor: default !important;
     }
@@ -60,6 +73,14 @@ export default {
         border-radius: calc(3px + 0.5vw);
         background: #fff;
         opacity: 0.7;
+    }
+
+    @media screen and (max-width: 1024px) {
+        .card.empty {
+            width: calc(50px + 0.5vw);
+            height: calc(80px + 0.5vw);
+        }
+
     }
     .card .card-front {
         height: 100%;

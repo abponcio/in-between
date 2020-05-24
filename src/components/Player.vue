@@ -1,8 +1,13 @@
 <template>
     <div class="player">
         <div class="user-name">
-            <input type="text" placeholder="Input your name" v-model="value.name" v-if="value.id === session">
-            <h4 :class="{'red': value.current}" v-if="value.id !== session">{{value.name}}</h4>
+            <div class="control" v-if="value.id === session">
+                <form @submit.prevent="$emit('submitName', {name: $refs.name.value, player: value})" v-if="!value.submitted">
+                    <input ref="name" type="text" placeholder="Input your name">
+                </form>
+                <h4 class="red">{{value.name}}</h4>
+            </div>
+            <h4 :class="{'red': value.current}" v-else>{{value.name}}</h4>
             <button @click="joinGame" class="join" v-if="!joined && !value.id">Join</button>
         </div>
         <div class="card-slots">
@@ -47,9 +52,13 @@ export default {
     .card-slots {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-evenly;
+        justify-content: center;
         align-items: center;
         width: 100%;
+    }
+
+    .slot {
+        margin: 0 5px;
     }
 
     .user-name {
@@ -66,9 +75,16 @@ export default {
     }
 
     h4 {
-        margin-bottom: 0;
+        margin: 0;
     }
     .user-name {
         margin-bottom: 10px;
+    }
+    .control {
+        max-width: 125px; 
+    }
+
+    .control input {
+        width: 100%;
     }
 </style>
