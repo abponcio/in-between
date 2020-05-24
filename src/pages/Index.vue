@@ -30,7 +30,7 @@
                 @submitName="data => submitName(data)"></player>
             <div class="dealer">
                 <div style="padding: 0 1rem; border-right: 1px solid;">
-                    <card :value.sync="deck[deck.length - 1]" :deck="true" :count="deck.length - 1"></card>
+                    <card :value.sync="deck[deck.length - 1]" :deck="true" :count="deck.length"></card>
                 </div>
                 <div class="river">
                     <card v-for="(river, index) in rivers" :key="index" :value.sync="river" :empty="!river.name" :river="true" style="margin-left: 5px"></card>
