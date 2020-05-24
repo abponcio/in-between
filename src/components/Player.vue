@@ -1,7 +1,8 @@
 <template>
     <div class="player">
         <div class="user-name">
-            <h4 :class="{'red': value.current}">{{value.name}}</h4>
+            <input type="text" placeholder="Input your name" v-model="value.name" v-if="value.id === session">
+            <h4 :class="{'red': value.current}" v-if="value.id !== session">{{value.name}}</h4>
             <button @click="joinGame" class="join" v-if="!joined && !value.id">Join</button>
         </div>
         <div class="card-slots">
@@ -62,5 +63,12 @@ export default {
 
     h4.red {
         color: white;
+    }
+
+    h4 {
+        margin-bottom: 0;
+    }
+    .user-name {
+        margin-bottom: 10px;
     }
 </style>

@@ -9,6 +9,9 @@
       </nav>
     </header>
     <slot/>
+    <footer>
+      <div>Mini project by Mico</div>
+    </footer>
   </div>
 </template>
 

@@ -3,6 +3,19 @@
         <button @click="newGame()">New game</button> 
         <button @click="dealCards()">Deal cards</button>
         <div class="table">
+            <div class="chatbox">
+                <div class="flex">
+                    <h5>Chat Box ({{users}} user/s connected)</h5>
+                    <p>{{currentUser}}</p>
+                </div>
+                <div class="chat">
+                    <message v-for="(message, index) in messages" :key="index" :session="session" :value="message"></message>
+                </div>
+                <form @submit.prevent="sendMessage" class="sendChat">
+                    <input type="text" v-model="message"/>
+                    <button type="submit">Send</button>
+                </form>
+            </div>
             <player class="user-left" v-for="(player, index) in players" :key="index" :value.sync="player" :joined="joined" :class="`user-${player.position}`" @join="(data) => joinGame(data)" :session="session"></player>
             <div class="dealer">
                 <div class="deck" v-for="(card, index) in deck" :key="index" :class="{'shifted': deck.length === index + 1}">
@@ -17,9 +30,11 @@
 <script>
 import Card from "@/components/Card.vue";
 import Player from "@/components/Player.vue";
+import Message from "@/components/Message.vue";
 import SocketIO  from 'socket.io-client';
 
-export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
+// export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
+export const socket = SocketIO('http://localhost:3000');
 
 export default {
     created() {
@@ -30,12 +45,17 @@ export default {
     components: {
         Card,
         Player,
+        Message,
     },
     computed: {
 
         joined() {
             
             return this.players.find(player => player.id === this.session);
+        },
+        currentUser() {
+
+            return this.players.find(player => player.id === this.session)?.name || `Anon${Math.floor(Math.random() * 1000)}`;
         },
     },
     data() {
@@ -53,6 +73,9 @@ export default {
             players: [],
             positions: ['left', 'top', 'right', 'bottom'],
             session: '',
+            message: '',
+            messages: [],
+            users: 0,
         };
     },
     methods: {
@@ -159,6 +182,19 @@ export default {
 
             socket.emit('join', data);
         },
+        sendMessage() {
+
+            const payload = {
+
+                message: this.message,
+                name: this.currentUser,
+                id: this.session,
+            };
+
+            socket.emit('sendMessage', payload);
+
+            this.message = '';
+        },
     },
     metaInfo: {
         title: "Cards stuff",
@@ -180,7 +216,14 @@ export default {
      
             this.players = data.players;
             this.deck = data.deck;
-        })
+        });
+
+        socket.on('newMessage', data => {
+
+            this.messages.push(data);
+        });
+
+        socket.on('connected', data => this.users = data);
     },
 };
 </script>
@@ -191,8 +234,8 @@ export default {
         height: 80vh;
         display: grid;
         grid-template-areas:
-            '. . userTop userTop . .'
-            'userLeft dealer dealer dealer dealer userRight'
+            '. . userTop userTop . chatBox'
+            'userLeft dealer dealer dealer dealer chatBox'
             'userLeft dealer dealer dealer dealer userRight'
             'userLeft dealer dealer dealer dealer userRight'
             'userLeft dealer dealer dealer dealer userRight'
@@ -208,6 +251,7 @@ export default {
     .user-right { grid-area: userRight; }
     .user-bottom { grid-area: userBottom; }
     .dealer { grid-area: dealer; }
+    .chatbox { grid-area: chatBox; }
 
     .dealer {
         position: relative;
@@ -221,5 +265,17 @@ export default {
     }
     .shifted {
         left: 10px;
+    }
+    .chat {
+        background: #fff;
+        height: calc(150px + 0.5vw);
+        max-height: calc(150px + 0.5vw);
+        border-radius: 3px;
+        overflow-y: auto;
+    }
+    .flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 </style>
