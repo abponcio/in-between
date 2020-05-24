@@ -45,8 +45,8 @@ import Player from "@/components/Player.vue";
 import Message from "@/components/Message.vue";
 import SocketIO  from 'socket.io-client';
 
-// export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
-export const socket = SocketIO('http://localhost:3000');
+export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
+// export const socket = SocketIO('http://localhost:3000');
 
 export default {
     created() {
