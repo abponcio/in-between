@@ -2,6 +2,7 @@
     <Layout>
         <button @click="newGame()">New game</button> 
         <button @click="dealCards()">Deal cards</button>
+        <button @click="seeCards()">Flip cards</button>
         <div class="table">
             <div class="chatbox">
                 <div class="flex">
@@ -29,7 +30,7 @@
                 @submitName="data => submitName(data)"></player>
             <div class="dealer">
                 <div style="padding: 0 1rem; border-right: 1px solid;">
-                    <card :value.sync="deck[deck.length - 1]"></card>
+                    <card :value.sync="deck[deck.length - 1]" :deck="true" :count="deck.length - 1"></card>
                 </div>
                 <div class="river">
                     <card v-for="(river, index) in rivers" :key="index" :value.sync="river" :empty="!river.name" :river="true" style="margin-left: 5px"></card>
@@ -51,8 +52,7 @@ export const socket = SocketIO('https://young-shore-88277.herokuapp.com/');
 export default {
     created() {
 
-       this.buildDeck();
-       this.createPlayers();
+       this.newGame();
     },
     components: {
         Card,
@@ -106,6 +106,7 @@ export default {
             const payload = {
                 deck: this.deck,
                 players: this.players,
+                rivers: this.rivers,
             };
 
             socket.emit('update', payload);
@@ -189,6 +190,26 @@ export default {
             const payload = {
                 deck: this.deck,
                 players: this.players,
+                rivers: this.rivers,
+            };
+
+            socket.emit('update', payload);
+        },
+        seeCards() {
+            
+            this.players.map(player => {
+
+                Object.assign(player, {
+
+                    hands: player.hands.map(item => item ? Object.assign(item, {hidden: false}) : item),
+                });
+            });
+            this.rivers.map(river => Object.assign(river, {hidden: false}));
+
+            const payload = {
+                deck: this.deck,
+                players: this.players,
+                rivers: this.rivers,
             };
 
             socket.emit('update', payload);
@@ -248,6 +269,7 @@ export default {
      
             this.players = data.players;
             this.deck = data.deck;
+            this.rivers = data.rivers;
         });
 
         socket.on('newMessage', async data => {

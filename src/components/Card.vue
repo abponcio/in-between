@@ -12,8 +12,11 @@
                 {{value.name}}
             </div>
         </div>
-        <div class="card-back" style="color: black;" @click="value.hidden = !value.hidden" v-else-if="(player && player.current && session === player.id) || river">
+        <div class="card-back" style="color: black;" @click="value.hidden = !value.hidden" v-else-if="player && player.current && session === player.id">
             <h2>Reveal</h2>
+        </div>
+        <div class="card-back" style="color: black;" v-else-if="deck">
+            <h2>{{count}}</h2>
         </div>
         <div class="card-back" style="color: black;" v-else>
             <h2>Hidden</h2>
@@ -30,7 +33,9 @@ export default {
         'value',
         'player',
         'session',
-        'river'
+        'river',
+        'deck',
+        'count',
     ],
 }
 </script>

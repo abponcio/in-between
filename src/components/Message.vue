@@ -21,8 +21,15 @@ export default {
     ul.message {
         list-style: none;
         padding-left: 0;
-        font-size: calc(5px + 0.5vw);
+        font-size: calc(9px + 0.5vw);
     }
+
+    @media screen and (max-width: 1024px) {
+        ul.message {
+            font-size: calc(12px + 1vw);
+        }
+    }
+    
     li {
         padding: 5px;
     }

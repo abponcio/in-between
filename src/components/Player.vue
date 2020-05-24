@@ -1,9 +1,12 @@
 <template>
     <div class="player">
         <div class="user-name">
-            <div class="control" v-if="value.id === session">
+            <div v-if="value.id === session">
                 <form @submit.prevent="$emit('submitName', {name: $refs.name.value, player: value})" v-if="!value.submitted">
-                    <input ref="name" type="text" placeholder="Input your name">
+                    <div class="control">
+                        <input ref="name" type="text" placeholder="Input name">
+                    </div>
+                    <button type="submit">Save</button>
                 </form>
                 <h4 class="red">{{value.name}}</h4>
             </div>
@@ -87,4 +90,9 @@ export default {
     .control input {
         width: 100%;
     }
+
+    form {
+        display: flex;
+    }
+
 </style>

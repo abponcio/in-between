@@ -45,6 +45,11 @@ body {
   padding-right: 20px;
 }
 
+footer {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 .nav__link {
   margin-left: 20px;
 }
