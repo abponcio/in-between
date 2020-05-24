@@ -146,7 +146,7 @@ export default {
                 });
             });
 
-            this.rivers = new Array(2).fill({});
+            this.rivers = new Array(1).fill({});
         },
         createPlayers() {
 
@@ -179,7 +179,7 @@ export default {
                 return data;
             });
 
-            this.rivers = [this.deck.pop(), this.deck.pop()];
+            this.rivers = [this.deck.pop()];
 
             if (!this.players.every(player => player.hands.length === 2)) {
 
